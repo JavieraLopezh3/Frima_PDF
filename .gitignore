@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+.env
+.venv
+venv/
+ENV/
+
+# Application data (Temporary files)
+sessions/
+uploads/
+processed/
+proccessed/
+firmados/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

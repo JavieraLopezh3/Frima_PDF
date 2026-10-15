@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firma Digital Pro - Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gradient);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin-bottom: 35px;
+            font-size: 17px;
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            text-align: left;
+        }
+
+        @media (max-width: 600px) {
+            .upload-grid { grid-template-columns: 1fr; }
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .upload-section label {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .custom-file-input {
+            position: relative;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+            background: #f9fafb;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .custom-file-input:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .custom-file-input input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .input-info {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* LISTS STYLE */
+        .file-list-container {
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            padding: 5px;
+        }
+        .file-item {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+        .file-item:last-child { border-bottom: none; }
+        
+        .sig-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+            padding: 5px;
+        }
+        .sig-preview-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background: #f9fafb;
+        }
+
+        .btn-submit {
+            margin-top: 35px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.5);
+        }
+
+        .footer-note {
+            margin-top: 25px;
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card">
+        <div class="header">
+            <h1><i class="fa-solid fa-pen-nib"></i> Firma Digital Pro</h1>
+            <p>Procesa múltiples documentos con firmas personalizadas</p>
+        </div>
+
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="upload-grid">
+                <!-- PDFs -->
+                <div class="upload-section">
+                    <label><i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> Documentos PDF</label>
+                    <div class="custom-file-input">
+                        <span class="input-info">Selecciona uno o varios PDFs</span>
+                        <input type="file" id="pdf-input" name="pdfs" multiple accept=".pdf" required onchange="updatePdfList()">
+                    </div>
+                    <div class="file-list-container" id="pdf-list">
+                        <p style="font-size: 11px; color: #aaa; text-align: center; padding: 10px;">No hay archivos seleccionados</p>
+                    </div>
+                </div>
+
+                <!-- Firmas -->
+                <div class="upload-section">
+                    <label><i class="fa-solid fa-signature" style="color: var(--primary);"></i> Firmas (PNG)</label>
+                    <div class="custom-file-input">
+                        <span class="input-info">Sube hasta 5 firmas transparentes</span>
+                        <input type="file" id="sig-input" name="signatures" multiple accept=".png" required onchange="updateSigList()">
+                    </div>
+                    <div class="file-list-container" id="sig-list">
+                        <div class="sig-preview-grid" id="sig-preview-grid"></div>
+                        <p id="sig-empty-msg" style="font-size: 11px; color: #aaa; text-align: center; padding: 10px;">No hay firmas seleccionadas</p>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                Configurar Posicionamiento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </form>
+
+        <div class="footer-note">
+            <i class="fa-solid fa-shield-halved"></i> Privacidad garantizada: Procesamiento local.
+        </div>
+    </div>
+
+    <script>
+        function updatePdfList() {
+            const input = document.getElementById('pdf-input');
+            const list = document.getElementById('pdf-list');
+            const files = input.files;
+            
+            if (files.length === 0) {
+                list.innerHTML = '<p style="font-size: 11px; color: #aaa; text-align: center; padding: 10px;">No hay archivos seleccionados</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            Array.from(files).forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `<i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> ${file.name}`;
+                list.appendChild(div);
+            });
+        }
+
+        function updateSigList() {
+            const input = document.getElementById('sig-input');
+            const grid = document.getElementById('sig-preview-grid');
+            const emptyMsg = document.getElementById('sig-empty-msg');
+            const files = input.files;
+            
+            grid.innerHTML = '';
+            if (files.length === 0) {
+                emptyMsg.style.display = 'block';
+                return;
+            }
+            emptyMsg.style.display = 'none';
+
+            Array.from(files).slice(0, 5).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'sig-preview-img';
+                    grid.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</body>
+</html>

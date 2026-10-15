@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Firmas - Firma Digital Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-body: #f3f4f6;
+            --panel-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --accent: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        .top-bar h1 {
+            font-size: 20px;
+            margin: 0;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* SIDE PANEL - RESIZABLE */
+        .side-panel {
+            width: 260px;
+            min-width: 200px;
+            max-width: 500px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 25px;
+            overflow-y: auto;
+            resize: horizontal;
+            overflow: auto;
+        }
+
+        .panel-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .panel-section h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* SIGNATURE SELECTOR */
+        .sig-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+        }
+        .sig-option {
+            aspect-ratio: 1/1;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: #f9fafb;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .sig-option.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+            background-color: white;
+        }
+        .sig-option span {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* CONTROLS */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* PLACEMENT LIST */
+        .placements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .placement-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .btn-remove {
+            color: #ef4444;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        /* PDF AREA */
+        .pdf-view {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            background: #e5e7eb;
+            position: relative;
+        }
+        .pdf-wrapper {
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            cursor: crosshair;
+            line-height: 0;
+        }
+        #pdf-preview {
+            max-width: none;
+            height: auto;
+            display: block;
+        }
+        .signature-marker {
+            position: absolute;
+            cursor: move;
+            transform: translate(-50%, -50%);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 10;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            border: 1px dashed transparent;
+            transition: border 0.2s;
+        }
+        .signature-marker:hover {
+            border: 1px dashed var(--primary);
+        }
+
+        /* INPUTS & BUTTONS */
+        .btn-process {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-process:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-process:disabled { background: #d1d5db; cursor: not-allowed; transform: none; }
+
+        /* ZIP MODAL */
+        #zip-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .modal-content h2 { margin-top: 0; color: var(--primary); }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-cancel {
+            padding: 10px 20px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-confirm {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* OVERLAY */
+        #overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: blur(6px);
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <div class="spinner"></div>
+        <p>Firmando documentos... por favor espera.</p>
+    </div>
+
+    <!-- ZIP NAME MODAL -->
+    <div id="zip-modal">
+        <div class="modal-content">
+            <h2><i class="fa-solid fa-file-zipper"></i> Finalizar descarga</h2>
+            <p>Ingresa el nombre para tu archivo comprimido:</p>
+            <input type="text" id="zip-name" placeholder="firmados" value="firmados">
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeZipModal()">Cancelar</button>
+                <button class="btn-confirm" id="confirm-process-btn" onclick="sendCoordinates()">Procesar y Descargar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <h1><i class="fa-solid fa-file-signature"></i> Configuración de Firmas</h1>
+        <div style="color: var(--text-muted); font-size: 14px;">
+            <i class="fa-solid fa-circle-info"></i> Haz clic para agregar y arrastra las firmas para reubicarlas.
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <!-- PANEL IZQUIERDO: HERRAMIENTAS -->
+        <div class="side-panel">
+            <div class="panel-section">
+                <h2><i class="fa-solid fa-image"></i> Seleccionar Firma</h2>
+                <div class="sig-selector" id="sig-selector">
+                    <!-- Generado por JS -->
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2><i class="fa-solid fa-sliders"></i> Tamaño</h2>
+                <div class="control-group">
+                    <div class="slider-container">
+                        <input type="range" id="scale-slider" min="0.2" max="3" step="0.1" value="1">
+                        <span id="scale-value" style="font-weight: 600; width: 30px;">1.0x</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2><i class="fa-solid fa-list-check"></i> Firmas Colocadas</h2>
+                <div class="placements-list" id="placements-list">
+                    <p style="font-size: 12px; color: var(--text-muted); text-align: center;">No hay firmas colocadas aún.</p>
+                </div>
+            </div>
+
+            <div class="panel-section" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <button id="btn-process" class="btn-process" disabled onclick="openZipModal()">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> Procesar y Descargar
+                </button>
+            </div>
+        </div>
+
+        <!-- AREA CENTRAL: PDF -->
+        <div class="pdf-view">
+            <div class="pdf-wrapper" id="pdf-wrapper" onclick="markPosition(event)">
+                <img id="pdf-preview" src="/preview_img" alt="Vista previa PDF">
+                <div id="markers-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSigIndex = 0;
+        let placements = []; // {id, sig_index, x, y, scale}
+        const sigCount = {{ sig_count }};
+
+        // Drag and Drop state
+        let isDragging = false;
+        let activePlacementId = null;
+        let offset = { x: 0, y: 0 };
+
+        function initSigSelector() {
+            const container = document.getElementById('sig-selector');
+            container.innerHTML = '';
+            for (let i = 0; i < sigCount; i++) {
+                const div = document.createElement('div');
+                div.className = `sig-option ${i === 0 ? 'active' : ''}`;
+                div.style.backgroundImage = `url('/preview_sig/${i}')`;
+                div.innerHTML = `<span>${i + 1}</span>`;
+                div.onclick = () => selectSignature(i, div);
+                container.appendChild(div);
+            }
+        }
+
+        function selectSignature(index, element) {
+            currentSigIndex = index;
+            document.querySelectorAll('.sig-option').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        document.getElementById('scale-slider').oninput = function() {
+            document.getElementById('scale-value').innerText = parseFloat(this.value).toFixed(1) + 'x';
+        };
+
+        function markPosition(e) {
+            if (e.target !== document.getElementById('pdf-wrapper') && e.target !== document.getElementById('pdf-preview')) {
+                return;
+            }
+
+            const img = document.getElementById('pdf-preview');
+            const scale = parseFloat(document.getElementById('scale-slider').value);
+            
+            const x = (e.offsetX / img.clientWidth) * 100;
+            const y = (e.offsetY / img.clientHeight) * 100;
+
+            const id = Date.now();
+            placements.push({ id, sig_index: currentSigIndex, x, y, scale });
+            
+            renderMarkers();
+            renderPlacementsList();
+            document.getElementById('btn-process').disabled = false;
+        }
+
+        function renderMarkers() {
+            const container = document.getElementById('markers-container');
+            const img = document.getElementById('pdf-preview');
+            container.innerHTML = '';
+
+            placements.forEach(p => {
+                const marker = document.createElement('div');
+                marker.className = 'signature-marker';
+                marker.style.backgroundImage = `url('/preview_sig/${p.sig_index}')`;
+                
+                const pxX = (p.x / 100) * img.clientWidth;
+                const pxY = (p.y / 100) * img.clientHeight;
+                const visualW = 100 * p.scale;
+                const visualH = (visualW * 0.5);
+
+                marker.style.left = pxX + 'px';
+                marker.style.top = pxY + 'px';
+                marker.style.width = visualW + 'px';
+                marker.style.height = visualH + 'px';
+                
+                marker.onmousedown = (e) => startDrag(e, p.id);
+                
+                container.appendChild(marker);
+            });
+        }
+
+        function startDrag(e, id) {
+            e.stopPropagation();
+            isDragging = true;
+            activePlacementId = id;
+            
+            const marker = e.target;
+            const rect = marker.getBoundingClientRect();
+            offset.x = e.clientX - rect.left;
+            offset.y = e.clientY - rect.top;
+            
+            document.onmousemove = drag;
+            document.onmouseup = stopDrag;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const wrapper = document.getElementById('pdf-wrapper');
+            const wrapperRect = wrapper.getBoundingClientRect();
+            
+            let newPxX = e.clientX - wrapperRect.left;
+            let newPxY = e.clientY - wrapperRect.top;
+            
+            const p = placements.find(pl => pl.id === activePlacementId);
+            if (p) {
+                const img = document.getElementById('pdf-preview');
+                p.x = (newPxX / img.clientWidth) * 100;
+                p.y = (newPxY / img.clientHeight) * 100;
+            }
+            
+            renderMarkers();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            activePlacementId = null;
+            document.onmousemove = null;
+            document.onmouseup = null;
+            renderPlacementsList();
+        }
+
+        function renderPlacementsList() {
+            const list = document.getElementById('placements-list');
+            if (placements.length === 0) {
+                list.innerHTML = '<p style="font-size: 12px; color: var(--text-muted); text-align: center;">No hay firmas colocadas aún.</p>';
+                document.getElementById('btn-process').disabled = true;
+                return;
+            }
+
+            list.innerHTML = '';
+            placements.forEach((p) => {
+                const item = document.createElement('div');
+                item.className = 'placement-item';
+                item.innerHTML = `
+                    <span><strong>Firma ${p.sig_index + 1}</strong> (x${p.scale})</span>
+                    <button class="btn-remove" onclick="removePlacement(${p.id})"><i class="fa-solid fa-trash"></i></button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function removePlacement(id) {
+            placements = placements.filter(p => p.id !== id);
+            renderMarkers();
+            renderPlacementsList();
+        }
+
+        function openZipModal() {
+            document.getElementById('zip-modal').style.display = 'flex';
+        }
+
+        function closeZipModal() {
+            document.getElementById('zip-modal').style.display = 'none';
+        }
+
+        async function sendCoordinates() {
+            const zipName = document.getElementById('zip-name').value || 'firmados';
+            const overlay = document.getElementById('overlay');
+            
+            closeZipModal();
+            overlay.style.display = 'flex';
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        placements: placements, 
+                        filename: zipName 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    window.location.href = result.download_url;
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (error) {
+                alert("Hubo un error crítico en el servidor.");
+            } finally {
+                overlay.style.display = 'none';
+            }
+        }
+
+        window.onload = initSigSelector;
+    </script>
+</body>
+</html>
